@@ -92,6 +92,9 @@ def parse_options(options, jetpack_id):
                 radio.setAttribute("label", item["label"])
                 radiogroup.appendChild(radio)
             setting.appendChild(radiogroup)
+        elif (pref["type"] == "string"):
+            if ("inputtype" in pref):
+                setting.setAttribute("inputtype", pref["inputtype"])
 
         root.appendChild(setting)
 
