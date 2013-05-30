@@ -29,5 +29,16 @@
     <em:homepageURL></em:homepageURL>
     <em:optionsType></em:optionsType>
     <em:updateURL></em:updateURL>
+
+    <em:localized>
+      <Description>
+        <em:locale></em:locale>
+        <em:name></em:name>
+        <em:description></em:description>
+        <em:creator></em:creator>
+        <em:homepageURL></em:homepageURL>
+      </Description>
+    </em:localized>
+
   </Description>
 </RDF>

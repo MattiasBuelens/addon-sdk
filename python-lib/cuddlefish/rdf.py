@@ -5,6 +5,7 @@
 import os
 import xml.dom.minidom
 import StringIO
+import string
 
 RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 EM_NS = "http://www.mozilla.org/2004/em-rdf#"
@@ -108,7 +109,36 @@ class RDFManifest(RDF):
             return True
         else:
             for i in elements:
-                i.parentNode.removeChild(i);
+                # don't get rid of the localized copy here
+                if not i.parentNode.parentNode.tagName == "em:localized":
+                    i.parentNode.removeChild(i);
+
+        return True;
+
+    # Adds localized versions of rdf attributes if provided.
+    def localize(self, locale):
+        # This is where we insert the copies of the 'localized' element
+        insertionPoint = self.dom.documentElement.getElementsByTagName("Description")[0]
+
+        # Get a reference to the template's 'localized' element
+        localized = self.dom.documentElement.getElementsByTagName("em:localized")[0]
+
+        # every locale needs to do this stuff
+        for j in locale:
+            # insert a copy of the 'localized' element
+            localizedCopy = localized.cloneNode(True)
+            insertionPoint.insertBefore(localizedCopy, localized)
+
+            # For every localizable element, see if we have a localized copy
+            for i in localizedCopy.getElementsByTagName("Description")[0].getElementsByTagName("*"):
+                tag = string.replace(i.tagName, "em:", "")
+                if j.get(tag):
+                    i.appendChild(self.dom.createTextNode(j[tag]))
+                else:
+                    i.parentNode.removeChild(i);
+
+        # Get rid of the template copy of the 'localized' element
+        insertionPoint.removeChild(localized)
 
         return True;
 
@@ -176,6 +206,11 @@ def gen_manifest(template_root_dir, target_cfg, jid,
         manifest.set("em:homepageURL", target_cfg.get("homepage"))
     else:
         manifest.remove("em:homepageURL")
+
+    if target_cfg.get("localized"):
+        manifest.localize(target_cfg["localized"])
+    else:
+        manifest.remove("em:localized")
 
     return manifest
 
