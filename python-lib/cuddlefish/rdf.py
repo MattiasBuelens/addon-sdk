@@ -130,12 +130,28 @@ class RDFManifest(RDF):
             insertionPoint.insertBefore(localizedCopy, localized)
 
             # For every localizable element, see if we have a localized copy
-            for i in localizedCopy.getElementsByTagName("Description")[0].getElementsByTagName("*"):
+            localizedDesc = localizedCopy.getElementsByTagName("Description")[0]
+            for i in localizedDesc.getElementsByTagName("*"):
                 tag = string.replace(i.tagName, "em:", "")
                 if j.get(tag):
                     i.appendChild(self.dom.createTextNode(j[tag]))
                 else:
                     i.parentNode.removeChild(i);
+
+            for developer in j.get("developers", [ ]):
+                elem = self.dom.createElement("em:developer");
+                elem.appendChild(self.dom.createTextNode(developer))
+                localizedDesc.appendChild(elem)
+
+            for translator in j.get("translators", [ ]):
+                elem = self.dom.createElement("em:translator");
+                elem.appendChild(self.dom.createTextNode(translator))
+                localizedDesc.appendChild(elem)
+        
+            for contributor in j.get("contributors", [ ]):
+                elem = self.dom.createElement("em:contributor");
+                elem.appendChild(self.dom.createTextNode(contributor))
+                localizedDesc.appendChild(elem)
 
         # Get rid of the template copy of the 'localized' element
         insertionPoint.removeChild(localized)
@@ -162,6 +178,11 @@ def gen_manifest(template_root_dir, target_cfg, jid,
     # RDF format accepts "true" as True, anything else as False. We expect
     # booleans in the .json file, not strings.
     manifest.set("em:unpack", "true" if target_cfg.get("unpack") else "false")
+
+    for developer in target_cfg.get("developers", [ ]):
+        elem = dom.createElement("em:developer");
+        elem.appendChild(dom.createTextNode(developer))
+        dom.documentElement.getElementsByTagName("Description")[0].appendChild(elem)
 
     for translator in target_cfg.get("translators", [ ]):
         elem = dom.createElement("em:translator");
